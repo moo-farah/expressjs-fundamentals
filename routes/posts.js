@@ -1,6 +1,6 @@
 import express from 'express';
 const router = express.Router();
-
+import logger from '../middleware/logger.js';
 
 let posts = [
     {id: 1, title: 'Post 1', body: 'This is the first post'},
@@ -8,8 +8,8 @@ let posts = [
     {id: 3, title: 'Post 3', body: 'This is the third post'},
 ];
 
-// Get all notes
-router.get('/', (req, res) => {
+// Get all posts
+router.get('/', logger, (req, res) => {
     const limit = parseInt(req.query.limit);
     if (!isNaN(limit) && limit > 0) {
         returnres.status(200).json(posts.slice(0, limit));
@@ -17,13 +17,15 @@ router.get('/', (req, res) => {
      res.status(200).json(posts);
 });
 
-// Get a single note
-router.get('/:id', (req, res) => {
+// Get a single post
+router.get('/:id', (req, res, next) => {
     const id = parseInt(req.params.id);
     const found = posts.find(post => post.id === id);
 
     if (!found) {
-        return res.status(404).json({message : `A post with id ${id} is not found`})
+       const error = new Error(`A post with id ${id} is not found`);
+       return next(error);
+    
     }
     res.status(200).json(found);
 });
